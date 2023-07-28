@@ -8,7 +8,7 @@ import numpy as np
 
 class Individual:
     def __init__(self, lo_range, hi_range, function_ID, gene=None):
-        if gene == None:
+        if gene is None:
             self.gene = np.round(np.random.uniform(lo_range, hi_range, 30), 3)
         else:
             self.gene = gene
