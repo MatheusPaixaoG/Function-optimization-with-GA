@@ -2,8 +2,8 @@ from functions.Function import Function
 
 
 class Rosenbrock(Function):
-    def __init__(self, lower_limit, upper_limit):
-        super().__init__(lower_limit, upper_limit)
+    def __init__(self):
+        super().__init__()
 
     def rosenbrock(self, point):
         sum_list = []

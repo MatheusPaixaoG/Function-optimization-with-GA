@@ -3,8 +3,8 @@ import math
 
 
 class Rastrigin(Function):
-    def __init__(self, lower_limit, upper_limit):
-        super().__init__(lower_limit, upper_limit)
+    def __init__(self):
+        super().__init__()
 
     def rastrigin(self, point):
         return 10 * len(point) + sum(

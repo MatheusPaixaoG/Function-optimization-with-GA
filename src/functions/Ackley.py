@@ -3,8 +3,8 @@ import numpy as np
 
 
 class Ackley(Function):
-    def __init__(self, lower_limit, upper_limit):
-        super().__init__(lower_limit, upper_limit)
+    def __init__(self):
+        super().__init__()
 
     def ackley(self, point, a=20, b=0.2, c=2 * np.pi):
         d = len(point)

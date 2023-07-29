@@ -1,11 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+sys.path.append("..")
 
+import params
 
 class Function:
-    def __init__(self, lower_limit, upper_limit):
-        self.lower_limit = lower_limit
-        self.upper_limit = upper_limit
+    def __init__(self):
+        self.lower_limit = params.FUNCTION["f_lo"]
+        self.upper_limit = params.FUNCTION["f_hi"]
 
     def plot(self, function, points_limit):
         fig = plt.figure(figsize=(40, 40))

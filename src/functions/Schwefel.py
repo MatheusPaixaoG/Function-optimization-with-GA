@@ -3,8 +3,8 @@ import math
 
 
 class Schwefel(Function):
-    def __init__(self, lower_limit, upper_limit):
-        super().__init__(lower_limit, upper_limit)
+    def __init__(self):
+        super().__init__()
 
     def schwefel(self, point):
         return 418.9829 * len(point) - sum(

@@ -2,22 +2,28 @@ import sys
 
 sys.path.append("..")
 
-from functions.FitnessFunction import Functions, FitnessFunction
-import numpy as np
+from functions.FitnessFunction import FitnessFunction
+import random
+import params
 
 
 class Individual:
-    def __init__(self, lo_range, hi_range, function_ID, gene=None):
+    def __init__(self, gene=None):
         if gene is None:
-            self.gene = np.round(np.random.uniform(lo_range, hi_range, 30), 3)
+            # self.gene = np.random(lo_range, hi_range, 30)
+            self.gene = [random.uniform(params.FUNCTION["f_lo"], params.FUNCTION["f_hi"]) for i in range(30)]
         else:
             self.gene = gene
-        self.fitness_function = FitnessFunction(lo_range, hi_range)
-        self.fitness = round(self.calc_fitness(function_ID), 4)
+        self.fitness_function = FitnessFunction()
+        self.fitness = self.calc_fitness()
 
-    def calc_fitness(self, function_ID):
-        fit = self.fitness_function.calculate(self.gene, function_ID)
-        return round(fit, 4)
+    def calc_fitness(self):
+        fit = self.fitness_function.calculate(self.gene)
+        return fit
+
+    def set_gene(self, new_gene):
+        self.gene = new_gene
+        self.fitness = self.calc_fitness()
 
     def __str__(self):
-        return f"[Individual] {self.gene} {self.fitness}"
+        return str(round(self.fitness,5))
