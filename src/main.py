@@ -94,14 +94,12 @@ if __name__ == "__main__":
     iter = 0
     
     while(iter < params.RUN["max_iterations"] and best_individual.fitness >= params.FUNCTION["global_min"]):
-        # print("=============================================")
 
         if(iter % params.RUN["print_step"] == 0):
-            print(f"{iter}th iter)  {[str(pop) for pop in population]}\n")
+            print(f"({iter}th iter)  {[str(pop) for pop in population]}\n")
 
         # Selection of parents
         parents = do_tournament(population)
-        # print(f"PARENTS: {[str(parent) for parent in parents]}")
 
         # Crossover and generation of offspring
         offspring = []
@@ -111,13 +109,11 @@ if __name__ == "__main__":
             offspring = crossover(parents, cut_point)
         else:
             offspring += [copy.deepcopy(parent) for parent in parents]
-        # print(f"OFFSPRING: {[str(o) for o in offspring]}")
 
         # Mutation
         mutation_num = random.random()
         if(mutation_num <= params.MUTATION["prob"]):
             offspring = mutate(offspring)
-            # print("mutacionou!")
 
         # Append offspring and select survivors
         population += offspring

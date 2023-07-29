@@ -4,9 +4,9 @@ from enum import Enum
 
 RUN = {
     # "random_seed": "jooj",
-    "max_iterations": 10000,
+    "max_iterations": 100_000,
     "population_size": 30,
-    "print_step": 100
+    "print_step": 1000
 }
 
 PRT_SEL = {
@@ -16,7 +16,7 @@ PRT_SEL = {
 
 CROSSOVER = {
     "alpha": 0.4,
-    "type": "simple",
+    "type": "normal",
     "chance": 0.9
 }
 
@@ -40,36 +40,6 @@ FUNCTION = {
     "f_lo": -32.768,
     "f_hi": 32.768
 }
-
-
-""" # Max Iterations
-max_iterations = 100
-
-# Population Size
-population_size = 10
-
-# Selection of parents
-number_of_parents = 2
-num_indiv_selected = 5
-
-#Crossover
-cut_point = 2
-alpha = 0.4
-cross_type = "complete"
-crossover_chance = 0.9
-
-#Mutation
-mutation_prob = 0.7
-
-#Survivor Selection
-offspring_size = 2
-
-#Functions: ranges and global minimum
-global_min = 4
-
-# default => Ackley range
-f_lo, f_hi = -32.768, 32.768 """
-#random.seed(RUN["random_seed"])
 
 def set_function(function_name):
     if(function_name == "ackley"):
