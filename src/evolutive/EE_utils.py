@@ -13,13 +13,17 @@ learning_rate = learning_rate_modifier * 1/(30**0.5)
 mutation_epsilon = 0.01
 
 def run_ee():
-    population = [Individual_EE() for _ in range(10)]
-    print([str(pop) for pop in population])
+    population = [Individual_EE() for _ in range(2)]
+    
+    for pop in population:
+        print(f"f: {[f for f in pop.features]} | step: {pop.step} | fit: {pop.fitness}")
+        print()
 
-    parents = parent_selection(population)
-
+    ofspring = crossover(population, "biologic")
     print()
-    print([p.fitness for p in parents])
+
+    print(f"f: {[f for f in ofspring.features]} | step: {ofspring.step} | fit: {ofspring.fitness}")
+
 
 def init_population():
     population = [Individual_EE() for _ in range(population_size)]
@@ -28,18 +32,43 @@ def init_population():
 def sort_by_fitness(population):
     population.sort(key=lambda x: x.fitness)
 
-def parent_selection(population, n_parents = 2):
+def parent_selection(population, n_parents = 2, allow_repetitions=False):
     parents = []
     for _ in range(n_parents):
-        chosen = None
+        chosen = random.choice(population)
 
-        while chosen == None or chosen not in population:
-            chosen = random.choice(population)
+        if not allow_repetitions:
+            while chosen in parents:
+                chosen = random.choice(population)
 
         parents.append(chosen)
         
     return parents
-        
+
+def crossover(population, parent_selection_mode):
+    if(parent_selection_mode == "biologic"):
+        parents = parent_selection(population, n_parents=2, allow_repetitions=False)
+        return biologic_crossover(parents)
+    
+    elif(parent_selection_mode == "per-gene"):
+        parents = parent_selection(population, n_parents=60, allow_repetitions=True)
+        return per_gene_crossover(population)
+
+def biologic_crossover(parents):
+    feat1 = copy.deepcopy(parents[0].features)
+    feat2 = copy.deepcopy(parents[1].features)
+    offspring_feats = []
+
+    for i in range(0,len(feat2)):
+        gene = (feat1[i] + feat2[i])/2
+        offspring_feats.append(gene)
+
+    offspring_step = (parents[0].step + parents[1].step)/2
+
+    return Individual_EE(offspring_feats, offspring_step)
+
+def per_gene_crossover(parents):
+    pass
 
 def mutate(offspring):
     new_offspring = []
