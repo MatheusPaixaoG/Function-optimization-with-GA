@@ -2,6 +2,7 @@ from enum import Enum
 #import random
 #PARAMETERS
 
+# GA PARAMETERS
 RUN = {
     # "random_seed": "jooj",
     "max_iterations": 100_000,
@@ -28,6 +29,7 @@ SVV_SEL = {
     "offspring_size": 2
 }
 
+# FUNCTION PARAMETERS
 class Functions(Enum):
     ACKLEY = 0
     RASTRIGIN = 1
