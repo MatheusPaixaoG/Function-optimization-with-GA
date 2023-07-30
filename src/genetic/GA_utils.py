@@ -2,6 +2,8 @@ from genetic.Individual import Individual
 import random
 import params
 import copy
+import statistics
+import matplotlib.pyplot as plt
 
 def init_population():
     population = [Individual() for _ in range(params.RUN["population_size"])]
@@ -92,17 +94,33 @@ def print_pop_comparison(old_pop, population):
     for pop in population:
         print(pop,end=" | ")
 
+def plot_statistic(statistic_list):
+    plt.plot(statistic_list, linestyle='-')
+    plt.xlabel('Iteração')
+    plt.ylabel('Valor')
+    plt.grid(True)
+    plt.show()
+
+def pop_avg_fitness(population):
+    fitness_pop = [ind.fitness for ind in population]
+    return statistics.fmean(fitness_pop)
+
 def run_ga():
     # Initialization of population
     population = init_population()
-
     old_pop = copy.deepcopy(population)
 
     # Loop variables
     best_individual = population[0]
     iter = 0
-    
+
+    # Statistics to plot
+    best_individuals = [best_individual.fitness]
+    avg_fitness = [pop_avg_fitness(population)]
+
     while(iter < params.RUN["max_iterations"] and best_individual.fitness >= params.FUNCTION["global_min"]):
+        best_individuals.append(best_individual.fitness)
+        avg_fitness.append(pop_avg_fitness(population))
 
         if(iter % params.RUN["print_step"] == 0):
             print(f"({iter}th iter)  {[str(pop) for pop in population]}\n")
@@ -132,3 +150,5 @@ def run_ga():
         iter += 1
 
     print_pop_comparison(old_pop, population)
+    plot_statistic(avg_fitness)
+    plot_statistic(best_individuals)
