@@ -118,10 +118,13 @@ def run_ga():
     best_individuals = [best_individual.fitness]
     avg_fitness = [pop_avg_fitness(population)]
 
-    while(iter < params.RUN["max_iterations"] and best_individual.fitness >= params.FUNCTION["global_min"]):
-        best_individuals.append(best_individual.fitness)
-        avg_fitness.append(pop_avg_fitness(population))
+    last_avg_fitness = pop_avg_fitness(population)
+    tol = 1e-4
+    it_with_same_fitness = 0
+    early_stopping_it = 5000
+    should_stop = False
 
+    while(iter < params.RUN["max_iterations"] and best_individual.fitness >= params.FUNCTION["global_min"] and not should_stop):
         if(iter % params.RUN["print_step"] == 0):
             print(f"({iter}th iter)  {[str(pop) for pop in population]}\n")
 
@@ -148,6 +151,18 @@ def run_ga():
         
         best_individual = population[0]
         iter += 1
+
+        best_individuals.append(best_individual.fitness)
+        avg_fitness.append(pop_avg_fitness(population))
+        current_avg_fitness = avg_fitness[-1]
+        if(abs(current_avg_fitness - last_avg_fitness) <= tol):
+            it_with_same_fitness += 1
+            if (it_with_same_fitness >= early_stopping_it):
+                should_stop = True
+                print("SHOULD STOP")
+        else:
+            it_with_same_fitness = 0
+        last_avg_fitness = current_avg_fitness
 
     print_pop_comparison(old_pop, population)
     plot_statistic(avg_fitness)
