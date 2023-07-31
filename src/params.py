@@ -22,7 +22,8 @@ CROSSOVER = {
 }
 
 MUTATION = {
-    "prob": 0.4
+    "prob": 0.4,
+    "forced_prob": 1
 }
 
 SVV_SEL = {

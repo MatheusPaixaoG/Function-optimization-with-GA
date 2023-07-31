@@ -118,13 +118,15 @@ def run_ga():
     best_individuals = [best_individual.fitness]
     avg_fitness = [pop_avg_fitness(population)]
 
-    last_avg_fitness = pop_avg_fitness(population)
-    tol = 1e-4
-    it_with_same_fitness = 0
-    early_stopping_it = 5000
-    should_stop = False
 
-    while(iter < params.RUN["max_iterations"] and best_individual.fitness >= params.FUNCTION["global_min"] and not should_stop):
+    it_with_same_fitness = 0
+
+    last_avg_fitness = pop_avg_fitness(population)
+    force_mutate_tol = 1e-4
+    force_mutate_it = 5000
+    forced_mutation = False
+
+    while(iter < params.RUN["max_iterations"] and best_individual.fitness >= params.FUNCTION["global_min"]):
         if(iter % params.RUN["print_step"] == 0):
             print(f"({iter}th iter)  {[str(pop) for pop in population]}\n")
 
@@ -155,11 +157,12 @@ def run_ga():
         best_individuals.append(best_individual.fitness)
         avg_fitness.append(pop_avg_fitness(population))
         current_avg_fitness = avg_fitness[-1]
-        if(abs(current_avg_fitness - last_avg_fitness) <= tol):
+        if(abs(current_avg_fitness - last_avg_fitness) <= force_mutate_tol and not forced_mutation):
             it_with_same_fitness += 1
-            if (it_with_same_fitness >= early_stopping_it):
-                should_stop = True
-                print("SHOULD STOP")
+            if (it_with_same_fitness >= force_mutate_it):
+                params.MUTATION["prob"] = params.MUTATION["forced_prob"]
+                print("FORCING MUTATION")
+                forced_mutation = True
         else:
             it_with_same_fitness = 0
         last_avg_fitness = current_avg_fitness
