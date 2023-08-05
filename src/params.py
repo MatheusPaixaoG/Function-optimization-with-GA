@@ -5,7 +5,7 @@ from enum import Enum
 # GA PARAMETERS
 RUN = {
     # "random_seed": "jooj",
-    "max_iterations": 100_000,
+    "max_iterations": 500_000,
     "population_size": 30,
     "print_step": 1000
 }
@@ -17,17 +17,20 @@ PRT_SEL = {
 
 CROSSOVER = {
     "alpha": 0.4,
-    "type": "normal",
-    "chance": 0.9
+    "type": "complete",
+    "chance": 0.9,
+    "offspring_size": 14
 }
 
 MUTATION = {
     "prob": 0.4,
-    "forced_prob": 1
+    "forced_prob": 1,
+    "force_mutate_tol": 1e-4,
+    "force_mutate_it": 2000
 }
 
 SVV_SEL = {
-    "offspring_size": 2
+    "offspring_size": 14
 }
 
 # FUNCTION PARAMETERS

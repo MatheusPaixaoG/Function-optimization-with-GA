@@ -36,10 +36,13 @@ def base_crossover(parents, cut_point, quant_to_modify):
     for q in range(quant_to_modify):
         gene1[cut_point + q] = aritimetic_combination(parents[1].gene,parents[0].gene,cut_point + q)
         gene2[cut_point + q] = aritimetic_combination(parents[0].gene,parents[1].gene,cut_point + q)
-
     offspring = []
     offspring.append(Individual(gene1))
     offspring.append(Individual(gene2))
+
+    
+    cut_point = random.randint(0,29)
+        
     return offspring
 
 def simple_crossover(parents, cut_point):
@@ -48,7 +51,21 @@ def simple_crossover(parents, cut_point):
 
 def normal_crossover(parents, cut_point):
     quant_to_modify = len(parents[0].gene) - cut_point
-    return base_crossover(parents, cut_point, quant_to_modify)
+    num_children = params.CROSSOVER["offspring_size"]
+    offspring = []
+
+    while (num_children > 0):
+        offspring += base_crossover(parents, cut_point, quant_to_modify)
+        num_children = num_children - 2
+        cut_point = random.randint(0,29)
+        quant_to_modify = len(parents[0].gene) - cut_point
+        if (num_children == 1):
+            gene1 = copy.deepcopy(parents[0].gene)
+            gene1[cut_point + q] = aritimetic_combination(parents[1].gene,parents[0].gene,cut_point + q)
+            offspring.append(Individual(gene1))
+    if (params.CROSSOVER["offspring_size"] % 2 == 1):
+        
+    return offspring
 
 def complete_crossover(parents):
     quant_to_modify = len(parents[0].gene)
@@ -118,12 +135,13 @@ def run_ga():
     best_individuals = [best_individual.fitness]
     avg_fitness = [pop_avg_fitness(population)]
 
+    # Statistics to plot before inferior to 1
+    best_individuals_begin = [best_individual.fitness]
+    avg_fitness_begin = [pop_avg_fitness(population)]
 
     it_with_same_fitness = 0
 
     last_avg_fitness = pop_avg_fitness(population)
-    force_mutate_tol = 1e-4
-    force_mutate_it = 5000
     forced_mutation = False
 
     while(iter < params.RUN["max_iterations"] and best_individual.fitness >= params.FUNCTION["global_min"]):
@@ -137,8 +155,8 @@ def run_ga():
         offspring = []
         crossover_num = random.random()
         if (crossover_num <= params.CROSSOVER["chance"]):
-            cut_point = random.randint(0,29)
-            offspring = crossover(parents, cut_point)
+            initial_cut_point = random.randint(0,29)
+            offspring += crossover(parents, initial_cut_point)
         else:
             offspring += [copy.deepcopy(parent) for parent in parents]
 
@@ -157,9 +175,9 @@ def run_ga():
         best_individuals.append(best_individual.fitness)
         avg_fitness.append(pop_avg_fitness(population))
         current_avg_fitness = avg_fitness[-1]
-        if(abs(current_avg_fitness - last_avg_fitness) <= force_mutate_tol and not forced_mutation):
+        if(abs(current_avg_fitness - last_avg_fitness) <= params.MUTATION["force_mutate_tol"] and not forced_mutation):
             it_with_same_fitness += 1
-            if (it_with_same_fitness >= force_mutate_it):
+            if (it_with_same_fitness >= params.MUTATION["force_mutate_it"]):
                 params.MUTATION["prob"] = params.MUTATION["forced_prob"]
                 print("FORCING MUTATION")
                 forced_mutation = True
@@ -167,6 +185,13 @@ def run_ga():
             it_with_same_fitness = 0
         last_avg_fitness = current_avg_fitness
 
+        if (current_avg_fitness >= 1):
+            avg_fitness_begin.append(current_avg_fitness)
+        if (best_individual.fitness >= 1):
+            best_individuals_begin.append(best_individual.fitness)
+
     print_pop_comparison(old_pop, population)
     plot_statistic(avg_fitness)
     plot_statistic(best_individuals)
+    plot_statistic(avg_fitness_begin)
+    plot_statistic(best_individuals_begin)
