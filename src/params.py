@@ -5,21 +5,21 @@ from enum import Enum
 # GA PARAMETERS
 RUN = {
     # "random_seed": "jooj",
-    "max_iterations": 500_000,
+    "max_iterations": 10_000,
     "population_size": 30,
     "print_step": 1000
 }
 
 PRT_SEL = {
-    "number_of_parents": 2,
+    "number_of_parents": 3,
     "num_indiv_selected": 5
 }
 
 CROSSOVER = {
     "alpha": 0.4,
-    "type": "complete",
+    "type": "normal",
     "chance": 0.9,
-    "offspring_size": 14
+    "offspring_size": 15
 }
 
 MUTATION = {
@@ -27,10 +27,6 @@ MUTATION = {
     "forced_prob": 1,
     "force_mutate_tol": 1e-4,
     "force_mutate_it": 2000
-}
-
-SVV_SEL = {
-    "offspring_size": 14
 }
 
 # FUNCTION PARAMETERS
