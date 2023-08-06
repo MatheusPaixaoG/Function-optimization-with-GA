@@ -158,7 +158,9 @@ def save_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, execution_num
     plt.title(title)
     plt.legend()
 
-    path = os.path.join(os.getcwd(),"data",f"{title + ' ' + str(execution_num)}")
+    curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
+
+    path = os.path.join(os.getcwd(),"data",f"{curr_datetime}_{title + ' ' + str(execution_num)}")
     print(path)
     plt.savefig(path)
 
@@ -167,7 +169,7 @@ def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
     path = os.path.join(os.getcwd(),"data",f"execution_metrics_{curr_datetime}")
 
     with open(path, "w") as file:
-        file_txt = f"Avg Fitness {avg_fit} \nStd Fitness {std_fit} \nNum. of iterations {n_iters} \nPerc. converged {perc_converged}" 
+        file_txt = f"Avg Fitness {avg_fit} \nStd Fitness {std_fit} \nNum. of iterations {n_iters} \nPerc. converged {perc_converged}.txt" 
         file.write(file_txt)
 
 def pop_avg_fitness(population):
@@ -264,7 +266,7 @@ def execution(execution_num=1):
 
     # Show statistics
     print_pop_comparison(old_pop, population)
-    save_statistic(avg_fitness, best_individuals, std_fitness, 1)
+    save_statistic(avg_fitness, best_individuals, std_fitness, execution_num)
     save_statistic(avg_fitness_begin, best_individuals_begin, std_fitness_begin, 
                    execution_num, title="Begin metrics per iteration")
 
