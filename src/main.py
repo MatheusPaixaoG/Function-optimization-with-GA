@@ -6,5 +6,5 @@ if __name__ == "__main__":
     params.set_function("ackley")
     points_limit = 50000
 
-    run_ga()
+    run_ga(2)
     #run_ee()

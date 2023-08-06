@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import math
+from datetime import datetime
 
 def init_population():
     population = [Individual() for _ in range(params.RUN["population_size"])]
@@ -146,7 +147,8 @@ def plot_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, title="Metric
     plt.legend()
     plt.show()
 
-def save_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, run_num, title="Metrics per iteration"):
+def save_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, execution_num=1, title="Metrics per iteration"):
+    plt.figure()
     plt.plot(avg_fitness_iter, label = 'Avg', linestyle='-')
     plt.plot(std_fitness, label= "Std",linestyle='-')
     plt.plot(best_indiv_iter, label= "Best",linestyle='-')
@@ -156,10 +158,17 @@ def save_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, run_num, titl
     plt.title(title)
     plt.legend()
 
-    path_abs = os.path.abspath(os.getcwd())
-    path_title_list = title.split('_')
-    path = os.path.join(path_abs, f"/data/{''.join(path_title_list)}")
+    path = os.path.join(os.getcwd(),"data",f"{title + ' ' + str(execution_num)}")
+    print(path)
     plt.savefig(path)
+
+def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
+    curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
+    path = os.path.join(os.getcwd(),"data",f"execution_metrics_{curr_datetime}")
+
+    with open(path, "w") as file:
+        file_txt = f"Avg Fitness {avg_fit} \nStd Fitness {std_fit} \nNum. of iterations {n_iters} \nPerc. converged {perc_converged}" 
+        file.write(file_txt)
 
 def pop_avg_fitness(population):
     fitness_pop = [ind.fitness for ind in population]
@@ -168,10 +177,7 @@ def pop_avg_fitness(population):
 def pop_individual_fitness(population):
     return [pop.fitness for pop in population]
 
-def execution():
-    pass
-
-def run_ga():
+def execution(execution_num=1):
     # Initialization of population
     population = init_population()
     old_pop = copy.deepcopy(population)
@@ -258,5 +264,38 @@ def run_ga():
 
     # Show statistics
     print_pop_comparison(old_pop, population)
-    plot_statistic(avg_fitness, best_individuals, std_fitness, 1)
-    plot_statistic(avg_fitness_begin, best_individuals_begin, std_fitness_begin, 1, title="Begin metrics per iteration")
+    save_statistic(avg_fitness, best_individuals, std_fitness, 1)
+    save_statistic(avg_fitness_begin, best_individuals_begin, std_fitness_begin, 
+                   execution_num, title="Begin metrics per iteration")
+
+    # Return execution metrics
+    converged = current_avg_fitness == params.FUNCTION["global_min"]
+    return current_avg_fitness, std_fitness[-1], iter, converged
+
+def run_ga(num_executions=1):
+
+    # Per execution metrics
+    avg_fit_ex = []
+    std_fit_ex = []
+    n_iters_ex = []
+    converged_ex = []
+
+    for i in range(num_executions):
+        print(f'\nEXECUTION {i+1} \n')
+        
+        # Run the algorithm and obtains the execution metrics
+        avg_fit, std_fit, n_iters, converged = execution(i)
+        
+        # Stores the execution metrics
+        avg_fit_ex.append(avg_fit)
+        std_fit_ex.append(std_fit)
+        n_iters_ex.append(n_iters)
+        converged_ex.append(converged)
+
+    avg_avg_fit = sum(avg_fit_ex)/num_executions
+    avg_std_fit = sum(std_fit_ex)/num_executions
+    avg_iters_ex = sum(n_iters_ex)/num_executions
+    converged_perc = converged_ex.count(True)/num_executions
+
+    save_avg_execution_metrics(avg_avg_fit, avg_std_fit, avg_iters_ex, converged_perc)
+    
