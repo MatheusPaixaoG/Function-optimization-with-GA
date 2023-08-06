@@ -3,6 +3,7 @@ import params
 import copy
 import sys
 import math
+import numpy as np
 
 sys.path.append("..")
 from evolutive.Individual_EE import Individual_EE
@@ -19,10 +20,19 @@ def run_ee():
         print(f"f: {[f for f in pop.features]} | step: {pop.step} | fit: {pop.fitness}")
         print()
 
-    ofspring = crossover(population, "biologic")
-    print()
+    ofspring_features = crossover(population, "global_discrete", step_crossover=False)
+    ofspring_step = crossover(population, "global_discrete", step_crossover=True)[0]
+    ofspring = Individual_EE(ofspring_features, ofspring_step)
 
+    print()
     print(f"f: {[f for f in ofspring.features]} | step: {ofspring.step} | fit: {ofspring.fitness}")
+
+    mutate(population)
+
+    print()
+    #print(f"f: {[f for f in population.features]} | step: {population.step} | fit: {population.fitness}")
+    for pop in population:
+        print(pop)
 
 
 def init_population():
@@ -45,34 +55,87 @@ def parent_selection(population, n_parents = 2, allow_repetitions=False):
         
     return parents
 
-def crossover(population, parent_selection_mode):
-    if(parent_selection_mode == "biologic"):
+def crossover(population, parent_selection_mode, step_crossover=False):
+    if(parent_selection_mode == "local_middle"):
         parents = parent_selection(population, n_parents=2, allow_repetitions=False)
-        return biologic_crossover(parents)
+        return local_middle_crossover(parents, step_crossover)
     
-    elif(parent_selection_mode == "per-gene"):
-        parents = parent_selection(population, n_parents=60, allow_repetitions=True)
-        return per_gene_crossover(population)
+    elif(parent_selection_mode == "global_middle"):
+        n_parents = 2 if step_crossover else 60
+        parents = parent_selection(population, n_parents=n_parents, allow_repetitions=True)
+        return global_middle_crossover(parents, step_crossover)
 
-def biologic_crossover(parents):
-    feat1 = copy.deepcopy(parents[0].features)
-    feat2 = copy.deepcopy(parents[1].features)
-    offspring_feats = []
+    elif(parent_selection_mode == "local_discrete"):
+        parents = parent_selection(population, n_parents=2, allow_repetitions=False)
+        return local_discrete_crossover(parents, step_crossover)
+    
+    elif(parent_selection_mode == "global_discrete"):
+        n_parents = 2 if step_crossover else 60
+        parents = parent_selection(population, n_parents=n_parents, allow_repetitions=True)
+        return global_discrete_crossover(parents, step_crossover)
 
-    for i in range(0,len(feat2)):
-        gene = (feat1[i] + feat2[i])/2
-        offspring_feats.append(gene)
+def local_middle_crossover(parents, step_crossover):
+    parent_var1 = parents[0].get_gene_or_step(step_crossover)
+    parent_var2 = parents[1].get_gene_or_step(step_crossover)
 
-    offspring_step = (parents[0].step + parents[1].step)/2
+    offspring_vars = np.divide(np.array(parent_var1) + np.array(parent_var2), 2)
+    offspring_vars = offspring_vars.tolist()
 
-    return Individual_EE(offspring_feats, offspring_step)
+    return offspring_vars
 
-def per_gene_crossover(parents):
-    pass
+def global_middle_crossover(parents, step_crossover):
+    offspring_vars = []
+    middle_index = int(len(parents)/2)
 
-def mutate(offspring):
-    new_offspring = []
-    for individual in offspring:
+    for i in range(0,middle_index):
+        p1 = parents[i]
+        p2 = parents[i+middle_index]
+
+        parent_var1 = p1.get_gene_or_step(step_crossover)
+        parent_var2 = p2.get_gene_or_step(step_crossover)
+
+        gene_i = (parent_var1[i] + parent_var2[i])/2
+        offspring_vars.append(gene_i)
+
+    return offspring_vars
+
+def local_discrete_crossover(parents, step_crossover):
+    parent_var1 = parents[0].get_gene_or_step(step_crossover)
+    parent_var2 = parents[1].get_gene_or_step(step_crossover)
+
+    parent_var1 = copy.deepcopy(parent_var1)
+    parent_var2 = copy.deepcopy(parent_var2)
+    parent_vars = [parent_var1, parent_var2]
+    offspring_vars = []
+
+    for i in range(0,len(parent_var2)):
+        offspring_vars.append(random.choice(parent_vars)[i])
+
+    return offspring_vars
+
+def global_discrete_crossover(parents, step_crossover):
+    offspring_vars = []
+    middle_index = int(len(parents)/2)
+
+    for i in range(0,middle_index):
+        p1 = parents[i]
+        p2 = parents[i+middle_index]
+
+        parent_var1 = p1.get_gene_or_step(step_crossover)
+        parent_var2 = p2.get_gene_or_step(step_crossover)
+
+        parent_var1 = copy.deepcopy(parent_var1)
+        parent_var2 = copy.deepcopy(parent_var2)
+        parent_vars = [parent_var1, parent_var2]
+
+        gene_i = random.choice(parent_vars)[i]
+        offspring_vars.append(gene_i)
+
+    return offspring_vars
+
+def mutate(population):
+    new_population = []
+    for individual in population:
         # Copying original values
         features = copy.deepcopy(individual.features)
         step = copy.deepcopy(individual.step)
@@ -89,10 +152,10 @@ def mutate(offspring):
 
         # Discard bad mutations
         if(mutant_indv.fitness > individual.fitness):
-            new_offspring.append(mutant_indv)
+            new_population.append(mutant_indv)
             print("Good mutation")
         else:
-            new_offspring.append(individual)
+            new_population.append(individual)
             print("Bad mutation")
     
-    return new_offspring
+    return new_population

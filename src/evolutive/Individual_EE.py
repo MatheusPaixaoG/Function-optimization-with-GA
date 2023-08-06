@@ -33,6 +33,12 @@ class Individual_EE:
 
     def get_gene(self):
         return f"|| fts: {self.features} | stp: {self.step} ||" 
+    
+    def get_gene_or_step(self, return_step=False):
+        if not return_step:
+            return self.features
+        else:
+            return [self.step]
 
     def __str__(self):
         return str(round(self.fitness,5))
