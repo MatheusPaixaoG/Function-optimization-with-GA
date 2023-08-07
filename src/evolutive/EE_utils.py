@@ -12,18 +12,30 @@ import math
 from datetime import datetime
 
 sys.path.append("..")
-from evolutive.Individual_EE import Individual_EE
+from evolutive.Individual_EE import Individual_EE, Individual_EE_Multi
 
+# Algorithm parameters
 population_size = 10
-learning_rate_modifier = 10
-learning_rate = learning_rate_modifier * 1/(30**0.5)
+step_method = "multi"
+offspring_size = 70  # 
+learning_rate_modifier = 1
+learning_rate_global_modifier = 1 # Only used if step_method = "multi"
 mutation_epsilon = 0.1
-offspring_size = 14
 
+# Adjust learning rate to step_method
+learning_rate = None
+learning_rate_global = None
+if step_method == "single":
+    learning_rate = learning_rate_modifier * (1 / math.sqrt(30))
+elif step_method == "multi":
+    learning_rate = learning_rate_modifier * (1 / math.sqrt(2 * math.sqrt(30)))
+    learning_rate_global = learning_rate_global_modifier * (1 / math.sqrt(2*30))
+else:
+    print("Step method not implemented.")
 
 def run_ee():
     global mutation_epsilon
-    population = [Individual_EE() for _ in range(population_size)]
+    population = init_population()
     sort_by_fitness(population)
 
     # Loop variables
@@ -42,16 +54,24 @@ def run_ee():
         offspring = []
         for _ in range(offspring_size):
             offspring_features = crossover(population, "local_middle", step_crossover=False)
-            offspring_step = crossover(population, "local_middle", step_crossover=True)[0]
-            offspring_ind = Individual_EE(offspring_features, offspring_step)
+
+            if(step_method == "single"):
+                offspring_step = crossover(population, "local_middle", step_crossover=True)[0]
+            else:
+                offspring_step = crossover(population, "local_middle", step_crossover=True)
+
+            offspring_ind = step_method_based_individual(offspring_features, offspring_step)
+            
             offspring.append(offspring_ind)
         
         population += offspring
         
-        population = survivor_selection(mutate(population))
+        population = mutate(population)
+        population = survivor_selection(population)
+
         curr_avg_fitness = pop_avg_fitness(population)
         if (curr_avg_fitness < 2):
-            mutation_epsilon = 0.01
+            mutation_epsilon = 0.001
 
         sort_by_fitness(population)
         best_individual = population[0]
@@ -67,8 +87,23 @@ def run_ee():
     # Show statistics
     save_statistic(avg_fitness, best_individuals, std_fitness, 1)
 
+def step_method_based_individual(features, step):
+    individual = None
+    if(step_method == "single"):
+        individual = Individual_EE(features, step)
+    elif(step_method == "multi"):
+        individual = Individual_EE_Multi(features, step)
+    else:
+        print("Step method not found")
+
+    return individual
+
 def init_population():
-    population = [Individual_EE() for _ in range(population_size)]
+    population = []
+    if(step_method == "single"):
+        population = [Individual_EE() for _ in range(population_size)]
+    elif(step_method == "multi"):
+        population  = [Individual_EE_Multi() for _ in range(population_size)]
     return population
 
 def sort_by_fitness(population):
@@ -78,17 +113,10 @@ def pop_individual_fitness(population):
     return [pop.fitness for pop in population]
 
 def parent_selection(population, n_parents = 2, allow_repetitions=False):
-    parents = []
-    for _ in range(n_parents):
-        chosen = random.choice(population)
-
-        if not allow_repetitions:
-            while chosen in parents:
-                chosen = random.choice(population)
-
-        parents.append(chosen)
-        
-    return parents
+    if (allow_repetitions or n_parents > len(population)):
+        return random.choices(population, n_parents)
+    else:
+        return random.sample(population, n_parents)
 
 def crossover(population, parent_selection_mode, step_crossover=False):
     if(parent_selection_mode == "local_middle"):
@@ -96,7 +124,9 @@ def crossover(population, parent_selection_mode, step_crossover=False):
         return local_middle_crossover(parents, step_crossover)
     
     elif(parent_selection_mode == "global_middle"):
-        n_parents = 2 if step_crossover else 60
+        step_len = len(population[0].step)
+        n_parents = step_len if step_crossover else 60
+        
         parents = parent_selection(population, n_parents=n_parents, allow_repetitions=True)
         return global_middle_crossover(parents, step_crossover)
 
@@ -105,7 +135,9 @@ def crossover(population, parent_selection_mode, step_crossover=False):
         return local_discrete_crossover(parents, step_crossover)
     
     elif(parent_selection_mode == "global_discrete"):
-        n_parents = 2 if step_crossover else 60
+        step_len = len(population[0].step)
+        n_parents = step_len if step_crossover else 60
+        
         parents = parent_selection(population, n_parents=n_parents, allow_repetitions=True)
         return global_discrete_crossover(parents, step_crossover)
 
@@ -175,15 +207,34 @@ def mutate(population):
         features = copy.deepcopy(individual.features)
         step = copy.deepcopy(individual.step)
 
+        new_step = None
+
         # Mutating evolution step
-        new_step = step * math.exp(learning_rate * random.gauss(0,1))
-        if new_step < mutation_epsilon:
-            new_step = mutation_epsilon
+        if (step_method == "single"):
+            new_step = step * math.exp(learning_rate * random.gauss(0,1))
+            if new_step < mutation_epsilon:
+                new_step = mutation_epsilon
+        elif (step_method == "multi"):
+            new_step = []
+            step_global = learning_rate_global * random.gauss(0,1)
+            for i in range(len(step)):
+                step_local = learning_rate * random.gauss(0,1)
+                
+                curr_step = step[i] * math.exp(step_global + step_local)
+                if curr_step < mutation_epsilon:
+                    curr_step = mutation_epsilon
+                new_step.append(curr_step)
+        else:
+            print("This step type was not implemented.")
+
 
         # Mutating features
-        new_features = [x + (new_step * random.gauss(0,1)) for x in features]
+        if(step_method == "single"):
+                new_features = [x + new_step * random.gauss(0,1) for x in features]
+        elif (step_method == "multi"):
+            new_features = [features[i] + (new_step[i] * random.gauss(0,1)) for i in range(len(features))]
 
-        mutant_indv = Individual_EE(new_features,new_step)
+        mutant_indv = step_method_based_individual(new_features, new_step)
 
         # Discard bad mutations
         if(mutant_indv.fitness > individual.fitness):
