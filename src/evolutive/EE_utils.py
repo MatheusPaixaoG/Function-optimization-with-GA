@@ -15,7 +15,8 @@ from generic_utils import *
 # Algorithm parameters
 population_size = 10
 step_method = "multi"
-offspring_size = 70  # 
+survivor_selection_method = "elitist"
+offspring_size = 70
 learning_rate_modifier = 1
 learning_rate_global_modifier = 1 # Only used if step_method = "multi"
 mutation_epsilon = 0.1
@@ -62,10 +63,18 @@ def run_ee():
             
             offspring.append(offspring_ind)
         
-        population += offspring
+        if survivor_selection_method == "elitist":
+            population += offspring
         
-        population = mutate(population)
-        population = survivor_selection(population)
+            population = mutate(population)
+            population = survivor_selection(population)
+
+        elif survivor_selection_method == "only_offspring":
+            offspring = mutate(offspring)
+            population = survivor_selection(offspring)
+
+        else:
+            print("Survivor selection method not implemented")
 
         curr_avg_fitness = pop_avg_fitness(population)
         if (curr_avg_fitness < 2):
@@ -238,7 +247,7 @@ def mutate(population):
 
 def survivor_selection(population):
     sort_by_fitness(population)
-    return population[:-offspring_size]
+    return population[:population_size]
 
 def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
     curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
