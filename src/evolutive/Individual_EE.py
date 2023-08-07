@@ -42,3 +42,29 @@ class Individual_EE:
 
     def __str__(self):
         return str(round(self.fitness,5))
+
+
+class Individual_EE_Multi(Individual_EE):
+    def __init__(self, features=None, step=None):
+        if features is None:
+            # self.features = np.random(lo_range, hi_range, 30)
+            self.features = [random.uniform(params.FUNCTION["f_lo"], params.FUNCTION["f_hi"]) for i in range(30)]
+        else:
+            self.features = features
+
+        if step is None:
+            self.step = [random.random()*5 for _ in range(30)]
+        else:
+            self.step = step
+
+        self.fitness_function = FitnessFunction()
+        self.fitness = self.calc_fitness()
+
+    def get_gene_or_step(self, return_step=False):
+        if not return_step:
+            return self.features
+        else:
+            return self.step
+
+    def __str__(self):
+        return str(round(self.fitness,5))
