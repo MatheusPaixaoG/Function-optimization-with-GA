@@ -1,18 +1,16 @@
-import random
-import params
 import copy
-import sys
 import math
-import numpy as np
-import statistics
-import matplotlib.pyplot as plt
 import numpy as np
 import os
-import math
+import params
+import random
+import sys
+
 from datetime import datetime
 
 sys.path.append("..")
 from evolutive.Individual_EE import Individual_EE, Individual_EE_Multi
+from generic_utils import *
 
 # Algorithm parameters
 population_size = 10
@@ -105,12 +103,6 @@ def init_population():
     elif(step_method == "multi"):
         population  = [Individual_EE_Multi() for _ in range(population_size)]
     return population
-
-def sort_by_fitness(population):
-    population.sort(key=lambda x: x.fitness)
-
-def pop_individual_fitness(population):
-    return [pop.fitness for pop in population]
 
 def parent_selection(population, n_parents = 2, allow_repetitions=False):
     if (allow_repetitions or n_parents > len(population)):
@@ -247,38 +239,6 @@ def mutate(population):
 def survivor_selection(population):
     sort_by_fitness(population)
     return population[:-offspring_size]
-
-def pop_avg_fitness(population):
-    fitness_pop = [ind.fitness for ind in population]
-    return statistics.fmean(fitness_pop)
-
-def plot_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, title="Metrics per iteration"):
-    plt.plot(avg_fitness_iter, label = 'Avg', linestyle='-')
-    plt.plot(std_fitness, label= "Std",linestyle='-')
-    plt.plot(best_indiv_iter, label= "Best",linestyle='-')
-    plt.xlabel('Iteration')
-    plt.ylabel('Fitness')
-    plt.grid(True)
-    plt.title(title)
-    plt.legend()
-    plt.show()
-
-def save_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, execution_num=1, title="Metrics per iteration"):
-    plt.figure()
-    plt.plot(avg_fitness_iter, label = 'Avg', linestyle='-')
-    plt.plot(std_fitness, label= "Std",linestyle='-')
-    plt.plot(best_indiv_iter, label= "Best",linestyle='-')
-    plt.xlabel('Iteration')
-    plt.ylabel('Fitness')
-    plt.grid(True)
-    plt.title(title)
-    plt.legend()
-
-    curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
-
-    path = os.path.join(os.getcwd(),"data",f"{curr_datetime}_{title + ' ' + str(execution_num)}")
-    print(path)
-    plt.savefig(path)
 
 def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
     curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')

@@ -1,20 +1,17 @@
-from genetic.Individual import Individual
-import random
-import params
 import copy
-import statistics
-import matplotlib.pyplot as plt
+import math
 import numpy as np
 import os
-import math
+import params
+import random
 from datetime import datetime
+
+from generic_utils import *
+from genetic.Individual import Individual
 
 def init_population():
     population = [Individual() for _ in range(params.RUN["population_size"])]
     return population
-
-def sort_by_fitness(population):
-    population.sort(key=lambda x: x.fitness)
 
 def select_for_tournament(population):
     return random.sample(population, params.PRT_SEL["num_indiv_selected"])
@@ -136,34 +133,6 @@ def print_pop_comparison(old_pop, population):
     for pop in population:
         print(pop,end=" | ")
 
-def plot_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, title="Metrics per iteration"):
-    plt.plot(avg_fitness_iter, label = 'Avg', linestyle='-')
-    plt.plot(std_fitness, label= "Std",linestyle='-')
-    plt.plot(best_indiv_iter, label= "Best",linestyle='-')
-    plt.xlabel('Iteration')
-    plt.ylabel('Fitness')
-    plt.grid(True)
-    plt.title(title)
-    plt.legend()
-    plt.show()
-
-def save_statistic(avg_fitness_iter, best_indiv_iter, std_fitness, execution_num=1, title="Metrics per iteration"):
-    plt.figure()
-    plt.plot(avg_fitness_iter, label = 'Avg', linestyle='-')
-    plt.plot(std_fitness, label= "Std",linestyle='-')
-    plt.plot(best_indiv_iter, label= "Best",linestyle='-')
-    plt.xlabel('Iteration')
-    plt.ylabel('Fitness')
-    plt.grid(True)
-    plt.title(title)
-    plt.legend()
-
-    curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
-
-    path = os.path.join(os.getcwd(),"data",f"{curr_datetime}_{title + ' ' + str(execution_num)}")
-    print(path)
-    plt.savefig(path)
-
 def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
     curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
     path = os.path.join(os.getcwd(),"data",f"execution_metrics_{curr_datetime}")
@@ -171,13 +140,6 @@ def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
     with open(path, "w") as file:
         file_txt = f"Avg Fitness {avg_fit} \nStd Fitness {std_fit} \nNum. of iterations {n_iters} \nPerc. converged {perc_converged}.txt" 
         file.write(file_txt)
-
-def pop_avg_fitness(population):
-    fitness_pop = [ind.fitness for ind in population]
-    return statistics.fmean(fitness_pop)
-
-def pop_individual_fitness(population):
-    return [pop.fitness for pop in population]
 
 def execution(execution_num=1):
     # Initialization of population
@@ -300,4 +262,3 @@ def run_ga(num_executions=1):
     converged_perc = converged_ex.count(True)/num_executions
 
     save_avg_execution_metrics(avg_avg_fit, avg_std_fit, avg_iters_ex, converged_perc)
-    

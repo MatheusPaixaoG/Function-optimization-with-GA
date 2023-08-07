@@ -1,9 +1,9 @@
+import random
 import sys
 
 sys.path.append("..")
 
 from functions.FitnessFunction import FitnessFunction
-import random
 import params
 
 
