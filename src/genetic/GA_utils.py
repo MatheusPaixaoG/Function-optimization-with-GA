@@ -133,15 +133,15 @@ def print_pop_comparison(old_pop, population):
     for pop in population:
         print(pop,end=" | ")
 
-def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
-    curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
-    path = os.path.join(os.getcwd(),"data",f"execution_metrics_{curr_datetime}")
+# def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
+#     curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
+#     path = os.path.join(os.getcwd(),"data",f"execution_metrics_{curr_datetime}")
 
-    with open(path, "w") as file:
-        file_txt = f"Avg Fitness {avg_fit} \nStd Fitness {std_fit} \nNum. of iterations {n_iters} \nPerc. converged {perc_converged}.txt" 
-        file.write(file_txt)
+#     with open(path, "w") as file:
+#         file_txt = f"Avg Fitness {avg_fit} \nStd Fitness {std_fit} \nNum. of iterations {n_iters} \nPerc. converged {perc_converged}.txt" 
+#         file.write(file_txt)
 
-def execution(execution_num=1):
+def execution(execution_num=1, function='ackley'):
     # Initialization of population
     population = init_population()
     old_pop = copy.deepcopy(population)
@@ -149,6 +149,8 @@ def execution(execution_num=1):
     # Loop variables
     best_individual = population[0]
     iter = 0
+    best_global_individual = best_individual
+    best_iter = 0
 
     # Statistics to plot
     best_individuals = [best_individual.fitness]
@@ -226,39 +228,49 @@ def execution(execution_num=1):
             best_individuals_begin.append(best_individual.fitness)
             std_fitness_begin.append(np.std(pop_individual_fitness(population)))
 
+        if (best_individual.fitness < best_global_individual.fitness):
+            best_global_individual = best_individual
+            best_iter = iter-1
+
     # Show statistics
     print_pop_comparison(old_pop, population)
-    save_statistic(avg_fitness, best_individuals, std_fitness, execution_num)
+    save_statistic(avg_fitness, best_individuals, std_fitness, execution_num, function)
     save_statistic(avg_fitness_begin, best_individuals_begin, std_fitness_begin, 
-                   execution_num, title="Begin metrics per iteration")
+                   execution_num, title="Begin metrics per iteration", function=function)
 
     # Return execution metrics
-    converged = current_avg_fitness == params.FUNCTION["global_min"]
-    return current_avg_fitness, std_fitness[-1], iter, converged
+    converged = best_individual.fitness <= params.FUNCTION["global_min"]
+    return current_avg_fitness, std_fitness[-1], iter, converged, best_global_individual, best_iter
 
-def run_ga(num_executions=1):
+def run_ga(num_executions=1, function='ackley'):
 
     # Per execution metrics
     avg_fit_ex = []
     std_fit_ex = []
     n_iters_ex = []
     converged_ex = []
+    best_ind_ex = []
+    best_iter_ex = []
 
     for i in range(num_executions):
         print(f'\nEXECUTION {i+1} \n')
         
         # Run the algorithm and obtains the execution metrics
-        avg_fit, std_fit, n_iters, converged = execution(i)
+        avg_fit, std_fit, n_iters, converged, best_individual, best_iter = execution(i, function)
         
         # Stores the execution metrics
         avg_fit_ex.append(avg_fit)
         std_fit_ex.append(std_fit)
         n_iters_ex.append(n_iters)
         converged_ex.append(converged)
+        best_ind_ex.append(best_individual.fitness)
+        best_iter_ex.append(best_iter)
 
     avg_avg_fit = sum(avg_fit_ex)/num_executions
     avg_std_fit = sum(std_fit_ex)/num_executions
     avg_iters_ex = sum(n_iters_ex)/num_executions
     converged_perc = converged_ex.count(True)/num_executions
+    avg_best_ind_ex = sum(best_ind_ex)/num_executions
+    avg_best_iter_ex = sum(best_iter_ex)/num_executions
 
-    save_avg_execution_metrics(avg_avg_fit, avg_std_fit, avg_iters_ex, converged_perc)
+    save_avg_execution_metrics(avg_avg_fit, avg_std_fit, avg_iters_ex, converged_perc, avg_best_ind_ex, avg_best_iter_ex, function)

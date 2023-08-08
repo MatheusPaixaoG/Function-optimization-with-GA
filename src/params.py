@@ -5,7 +5,7 @@ from enum import Enum
 # GA PARAMETERS
 RUN = {
     # "random_seed": "jooj",
-    "max_iterations": 10_000,
+    "max_iterations": 1_001,
     "population_size": 30,
     "print_step": 1000
 }
@@ -38,7 +38,7 @@ class Functions(Enum):
 
 FUNCTION = {
     "current_function": Functions.ACKLEY,
-    "global_min": 0,
+    "global_min": 1e-7,
     "f_lo": -32.768,
     "f_hi": 32.768
 }
