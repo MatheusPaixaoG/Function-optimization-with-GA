@@ -13,13 +13,13 @@ from evolutive.Individual_EE import Individual_EE, Individual_EE_Multi
 from generic_utils import *
 
 # Algorithm parameters
-population_size = 30
+population_size = 15
 step_method = "multi"
 survivor_selection_method = "only_offspring"
-offspring_size = 200
-learning_rate_modifier = 1
-learning_rate_global_modifier = 1 # Only used if step_method = "multi"
-mutation_epsilon = 0.1
+offspring_size = 105
+learning_rate_modifier = 4
+learning_rate_global_modifier = 4 # Only used if step_method = "multi"
+mutation_epsilon = 1
 
 # Adjust learning rate to step_method
 learning_rate = None
@@ -72,7 +72,7 @@ def execution(execution_num=1, function='ackley'):
             offspring_features, parents = crossover(population, "local_middle", step_crossover=False)
 
             if(step_method == "single"):
-                offspring_step, _  = crossover(population, "local_middle", parents, step_crossover=True)[0]
+                offspring_step = crossover(population, "local_middle", parents, step_crossover=True)[0]
             else:
                 offspring_step, _ = crossover(population, "local_middle", parents, step_crossover=True)
 

@@ -5,9 +5,9 @@ from enum import Enum
 # GA PARAMETERS
 RUN = {
     # "random_seed": "jooj",
-    "max_iterations": 1_001,
+    "max_iterations": 200_001,
     "population_size": 30,
-    "print_step": 1000
+    "print_step": 50000
 }
 
 PRT_SEL = {

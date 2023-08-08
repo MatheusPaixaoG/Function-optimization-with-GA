@@ -11,15 +11,15 @@ if __name__ == "__main__":
     if (not os.path.exists(data_path)):
         os.mkdir(data_path)
 
-    functions = ["ackley", "schwefel", "rastrigin", "rosenbrock"]
+    functions = ["schwefel", "rastrigin", "rosenbrock", "ackley"]
     params.set_function("ackley")
     points_limit = 50000
 
     # Run all functions
     for function in functions:
         params.set_function(function)
-        run_ga(2, function)
-        # run_ee(5, function)
+        # run_ga(2, function)
+        run_ee(8, function)
 
     # run_ga(2)
     # # run_ee(1)

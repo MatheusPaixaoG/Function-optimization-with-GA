@@ -38,7 +38,7 @@ class Individual_EE:
         if not return_step:
             return self.features
         else:
-            return [self.step]
+            return self.step
 
     def __str__(self):
         return str(round(self.fitness,5))
