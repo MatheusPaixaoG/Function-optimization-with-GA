@@ -14,11 +14,11 @@ from generic_utils import *
 
 # Algorithm parameters
 population_size = 15
-step_method = "multi"
+step_method = "single"
 survivor_selection_method = "only_offspring"
 offspring_size = 105
-learning_rate_modifier = 4
-learning_rate_global_modifier = 4 # Only used if step_method = "multi"
+learning_rate_modifier = 7
+learning_rate_global_modifier = 7 # Only used if step_method = "multi"
 mutation_epsilon = 1
 
 # Adjust learning rate to step_method

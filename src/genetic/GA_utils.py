@@ -8,6 +8,7 @@ from datetime import datetime
 
 from generic_utils import *
 from genetic.Individual import Individual
+from genetic.Crossover import Crossover
 
 def init_population():
     population = [Individual() for _ in range(params.RUN["population_size"])]
@@ -26,83 +27,6 @@ def do_tournament(population):
                 parents.append(elem)
                 break
     return parents
-
-def discrete_choice(parents, gene_idx):
-    prob = 1 / len(parents)
-    return (random.choice(parents).gene[gene_idx], prob)
-
-def aritimetic_combination(parent1, parent2, gene_idx):
-    return params.CROSSOVER["alpha"] * parent1[gene_idx] + (1 - params.CROSSOVER["alpha"]) * parent2[gene_idx]
-
-def base_crossover(parents, cut_point, quant_to_modify, offspring_idx):
-
-    num_parents = len(parents)
-    offspring = copy.deepcopy(parents[offspring_idx % num_parents].gene)
-
-    if (num_parents < 2):
-        print("At least 2 parents needed!")
-        return
-    elif (num_parents == 2):
-        
-        for q in range(quant_to_modify):
-            if (offspring_idx % 2 == 0):
-                offspring[cut_point + q] = aritimetic_combination(parents[1].gene,parents[0].gene,cut_point + q)
-            else:
-                offspring[cut_point + q] = aritimetic_combination(parents[0].gene,parents[1].gene,cut_point + q)
-        offspring = Individual(offspring)
-    else: #num_parents > 2
-        
-        for q in range(quant_to_modify):
-            gene, _ = discrete_choice(parents,cut_point + q)
-            offspring[cut_point + q] = gene
-        offspring = Individual(offspring)
-        
-    return offspring
-
-def simple_crossover(parents):
-    offspring = []
-    quant_to_modify = 1
-    num_children = params.CROSSOVER["offspring_size"]
-
-    for i in range(num_children):
-        cut_point = random.randint(0,29)
-        
-        offspring.append(base_crossover(parents, cut_point, quant_to_modify, i))
-
-    return offspring
-
-def normal_crossover(parents):
-    offspring = []
-    num_children = params.CROSSOVER["offspring_size"]
-
-    for i in range(num_children):
-        cut_point = random.randint(0,29) + 1
-        quant_to_modify = len(parents[0].gene) - cut_point
-
-        offspring.append(base_crossover(parents, cut_point, quant_to_modify, i))
-        
-    return offspring
-
-def complete_crossover(parents):
-    offspring = []
-    quant_to_modify = len(parents[0].gene)
-    cut_point = 0
-    num_children = params.CROSSOVER["offspring_size"]
-
-    for i in range(num_children):
-        offspring.append(base_crossover(parents, cut_point, quant_to_modify, i))
-
-    return offspring
-
-def crossover(parents):
-    if (params.CROSSOVER["type"] == "simple"):
-        return simple_crossover(parents)
-    elif (params.CROSSOVER["type"] == "normal"):
-        return normal_crossover(parents)
-    elif (params.CROSSOVER["type"] == "complete"):
-        return complete_crossover(parents)
-    else:
-        print("This crossover type does not exist or was not implemented.")
 
 def mutate(offspring):
     new_offspring = []
@@ -142,6 +66,7 @@ def print_pop_comparison(old_pop, population):
 #         file.write(file_txt)
 
 def execution(execution_num=1, function='ackley'):
+    cro = Crossover()
     # Initialization of population
     population = init_population()
     old_pop = copy.deepcopy(population)
@@ -178,7 +103,7 @@ def execution(execution_num=1, function='ackley'):
         offspring = []
         crossover_num = random.random()
         if (crossover_num <= params.CROSSOVER["chance"]):
-            offspring += crossover(parents)
+            offspring += cro.crossover(parents)
         else:
             offspring_size = params.CROSSOVER["offspring_size"]
             n_parents = params.PRT_SEL["number_of_parents"]

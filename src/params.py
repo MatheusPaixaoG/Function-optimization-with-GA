@@ -6,8 +6,8 @@ from enum import Enum
 RUN = {
     # "random_seed": "jooj",
     "max_iterations": 200_001,
-    "population_size": 30,
-    "print_step": 50000
+    "population_size": 500,
+    "print_step": 100
 }
 
 PRT_SEL = {
@@ -16,15 +16,15 @@ PRT_SEL = {
 }
 
 CROSSOVER = {
-    "alpha": 0.4,
-    "type": "normal",
+    "alpha": 0.5,
+    "type": "complete",
     "chance": 0.9,
-    "offspring_size": 15
+    "offspring_size": 100
 }
 
 MUTATION = {
-    "prob": 0.4,
-    "forced_prob": 1,
+    "prob": 0.1,
+    "forced_prob": 0.1,
     "force_mutate_tol": 1e-4,
     "force_mutate_it": 2000
 }
