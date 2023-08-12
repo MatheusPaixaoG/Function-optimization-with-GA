@@ -21,5 +21,5 @@ if __name__ == "__main__":
     #     # run_ga(2, function)
     #     run_ee(8, function)
 
-    run_ga( )
-    # # run_ee(1)
+    # run_ga()
+    run_ee(1)

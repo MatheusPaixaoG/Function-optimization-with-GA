@@ -29,6 +29,15 @@ MUTATION = {
     "force_mutate_it": 2000
 }
 
+# EE PARAMETERS
+EE = {
+    "step_method": "single",
+    "survivor_selection_method": "only_offspring",
+    "learning_rate_modifier": 7,
+    "learning_rate_global_modifier": 7, # Only used if step_method = "multi"
+    "mutation_epsilon": 1
+}
+
 # FUNCTION PARAMETERS
 class Functions(Enum):
     ACKLEY = 0

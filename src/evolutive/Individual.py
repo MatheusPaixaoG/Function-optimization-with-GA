@@ -6,7 +6,7 @@ sys.path.append("..")
 import params
 from functions.FitnessFunction import FitnessFunction
 
-class Individual_EE:
+class Individual:
     def __init__(self, features=None, step=None):
         if features is None:
             # self.features = np.random(lo_range, hi_range, 30)
@@ -44,7 +44,7 @@ class Individual_EE:
         return str(round(self.fitness,5))
 
 
-class Individual_EE_Multi(Individual_EE):
+class IndividualMulti(Individual):
     def __init__(self, features=None, step=None):
         if features is None:
             # self.features = np.random(lo_range, hi_range, 30)
