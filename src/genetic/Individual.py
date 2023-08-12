@@ -1,10 +1,9 @@
-import random
-import sys
+import random, sys
 
 sys.path.append("..")
 
-from functions.FitnessFunction import FitnessFunction
 import params
+from functions.FitnessFunction import FitnessFunction
 
 
 class Individual:

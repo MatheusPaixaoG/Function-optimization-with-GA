@@ -1,7 +1,4 @@
-import matplotlib.pyplot as plt
-import os
-import statistics
-import sys
+import matplotlib.pyplot as plt, os, statistics, sys
 
 sys.path.append("..")
 

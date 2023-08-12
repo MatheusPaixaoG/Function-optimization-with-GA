@@ -1,48 +1,10 @@
-import copy
-import math
-import numpy as np
-import os
+import copy, math, numpy as np, random
+
 import params
-import random
-from datetime import datetime
-
 from generic_utils import *
-from genetic.Individual import Individual
-from genetic.Crossover import Crossover
-
-def init_population():
-    population = [Individual() for _ in range(params.RUN["population_size"])]
-    return population
-
-def select_for_tournament(population):
-    return random.sample(population, params.PRT_SEL["num_indiv_selected"])
-
-def do_tournament(population):
-    parents = []
-    for _ in range(params.PRT_SEL["number_of_parents"]):
-        selected = select_for_tournament(population)
-        sort_by_fitness(selected)
-        for elem in selected:
-            if elem not in parents:
-                parents.append(elem)
-                break
-    return parents
-
-def mutate(offspring):
-    new_offspring = []
-    for individual in offspring:
-        gene = copy.deepcopy(individual.gene)
-        gene_len = len(gene)
-        selected_gene_idx = random.randrange(gene_len)
-        gene[selected_gene_idx] = random.uniform(params.FUNCTION["f_lo"], params.FUNCTION["f_hi"])
-        # gene = [random.uniform(params.FUNCTION["f_lo"], params.FUNCTION["f_hi"]) for i in range(30)]
-        individual.set_gene(gene)
-        new_offspring.append(individual)
-    return new_offspring
-
-def survivor_selection(population):
-    sort_by_fitness(population)
-    return population[:-params.CROSSOVER["offspring_size"]]
+from genetic.crossover import *
+from genetic.mutation import *
+from genetic.population_utils import *
 
 def print_pop_comparison(old_pop, population):
     #### Pop comparision print
@@ -57,16 +19,7 @@ def print_pop_comparison(old_pop, population):
     for pop in population:
         print(pop,end=" | ")
 
-# def save_avg_execution_metrics(avg_fit, std_fit, n_iters, perc_converged):
-#     curr_datetime = datetime.now().strftime('%m_%d_%H_%M_%S')
-#     path = os.path.join(os.getcwd(),"data",f"execution_metrics_{curr_datetime}")
-
-#     with open(path, "w") as file:
-#         file_txt = f"Avg Fitness {avg_fit} \nStd Fitness {std_fit} \nNum. of iterations {n_iters} \nPerc. converged {perc_converged}.txt" 
-#         file.write(file_txt)
-
 def execution(execution_num=1, function='ackley'):
-    cro = Crossover()
     # Initialization of population
     population = init_population()
     old_pop = copy.deepcopy(population)
@@ -103,7 +56,7 @@ def execution(execution_num=1, function='ackley'):
         offspring = []
         crossover_num = random.random()
         if (crossover_num <= params.CROSSOVER["chance"]):
-            offspring += cro.crossover(parents)
+            offspring += crossover(parents)
         else:
             offspring_size = params.CROSSOVER["offspring_size"]
             n_parents = params.PRT_SEL["number_of_parents"]
@@ -170,11 +123,11 @@ def execution(execution_num=1, function='ackley'):
 def run_ga(num_executions=1, function='ackley'):
 
     # Per execution metrics
-    avg_fit_ex = []
-    std_fit_ex = []
-    n_iters_ex = []
+    avg_fit_ex   = []
+    std_fit_ex   = []
+    n_iters_ex   = []
     converged_ex = []
-    best_ind_ex = []
+    best_ind_ex  = []
     best_iter_ex = []
 
     for i in range(num_executions):
